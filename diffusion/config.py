@@ -28,9 +28,9 @@ class Config:
     patch_size: tuple[int, int]
     out_channels: int
     embed_dim: int = 288  # should be divisible by num_heads
-    timesteps: int = 600
+    timesteps: int = 1000
     noise_schedule: str = "cosine"
-    num_dit_blocks: int = 4
+    num_dit_blocks: int = 8
     num_heads: int = 6
     device: str = "cpu"
     hidden_layer_ratio: int = 4

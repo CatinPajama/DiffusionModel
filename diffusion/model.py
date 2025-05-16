@@ -216,7 +216,7 @@ class DiT(nn.Module):
         self.time_embedder = TimeEmbedding(config)
 
         if config.num_classes > 0:
-            self.label_embedder = nn.Embedding(config.num_classes, config.embed_dim)
+            self.label_embedder = nn.Embedding(config.num_classes + 1, config.embed_dim)
 
         self.register_buffer("pos_embed", positional_embedding2d(config))
 

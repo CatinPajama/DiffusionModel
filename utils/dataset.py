@@ -23,9 +23,9 @@ class CustomDataset(Dataset):
         data = 2 * data - 1
 
         if self.labels is not None:
-            return (data, self.labels[idx])
+            return (data, self.labels[idx] + 1)
 
-        return (data, -1)
+        return (data, 0)
 
 
 def read_dataset(train_directory, conditional, batch_size, workers):

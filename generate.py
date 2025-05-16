@@ -2,8 +2,13 @@ import torch
 import os
 import argparse
 import torchvision
+import matplotlib.pyplot as plt
 
-from diffusion.gaussian import GausianDiffusion, CosineNoiseSchedule
+from diffusion.gaussian import (
+    GausianDiffusion,
+    CosineNoiseSchedule,
+    LinearNoiseSchedule,
+)
 from diffusion.model import DiT
 from diffusion.config import Config
 
@@ -29,16 +34,19 @@ if __name__ == "__main__":
 
     model.load_state_dict(checkpoint["model"])
 
+    model.eval()
+
     schedule = CosineNoiseSchedule(config.timesteps, device=config.device)
+    # schedule = LinearNoiseSchedule(config.timesteps, 1e-4, 0.02, device=config.device)
+
     gaussian_diffusion = GausianDiffusion(schedule)
 
     with torch.inference_mode():
         x = gaussian_diffusion.sample(model, batch, config.num_classes)
 
-        print(x.max(), x.min())
-        samples = (x.cpu().squeeze(1) + 1) / 2
-        # PIECE OF SSHIT TORCHVISION REQUIRES [0,1] and not [0,255] >:(
+        samples = (x.cpu() + 1) / 2
 
+        # PIECE OF SSHIT TORCHVISION REQUIRES [0,1] and not [0,255] >:(
         for i, sample in enumerate(samples):
             out_path = os.path.join(args.output, f"{i}.png")
-            torchvision.utils.save_image(samples, out_path)
+            torchvision.utils.save_image(sample, out_path)

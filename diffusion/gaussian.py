@@ -93,7 +93,9 @@ class GausianDiffusion:
         """
         labels = None
         if num_classes > 0:
-            labels = torch.randint(0, num_classes, (batch_size,))
+            labels = torch.randint(
+                1, num_classes + 1, (batch_size,), device=self.schedule.device
+            )
 
         print(labels)
 
@@ -113,8 +115,7 @@ class GausianDiffusion:
                 x
                 - coeff
                 * model(
-                    x,
-                    torch.full((batch_size,), t, device=self.schedule.device),
+                    x, torch.full((batch_size,), t, device=self.schedule.device), labels
                 )
             ) + z * torch.sqrt(self.schedule.beta[t])
 

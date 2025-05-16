@@ -7,6 +7,7 @@ from diffusion.model import Config
 from diffusion.gaussian import (
     GausianDiffusion,
     CosineNoiseSchedule,
+    LinearNoiseSchedule,
 )
 from utils.dataset import read_dataset
 
@@ -51,6 +52,7 @@ if __name__ == "__main__":
     model = model.to(args.device)
 
     schedule = CosineNoiseSchedule(config.timesteps, device=args.device)
+    # schedule = LinearNoiseSchedule(config.timesteps, 1e-4, 0.02, device=args.device)
     gaussian_diffusion = GausianDiffusion(schedule)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
