@@ -1,13 +1,11 @@
-import torch
 import os
 import argparse
+import torch
 import torchvision
-import matplotlib.pyplot as plt
 
 from diffusion.gaussian import (
     GausianDiffusion,
     CosineNoiseSchedule,
-    LinearNoiseSchedule,
 )
 from diffusion.model import DiT
 from diffusion.config import Config
@@ -20,6 +18,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o", "--output", type=str, default="./", help="output directory"
     )
+    parser.add_argument("-w", "--guidance", type=int, default=1)
     parser.add_argument("-n", "--num_images", type=int)
 
     args = parser.parse_args()
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     gaussian_diffusion = GausianDiffusion(schedule)
 
     with torch.inference_mode():
-        x = gaussian_diffusion.sample(model, batch, config.num_classes)
+        x = gaussian_diffusion.sample(model, batch, config.num_classes, args.guidance)
 
         samples = (x.cpu() + 1) / 2
 

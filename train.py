@@ -7,7 +7,6 @@ from diffusion.model import Config
 from diffusion.gaussian import (
     GausianDiffusion,
     CosineNoiseSchedule,
-    LinearNoiseSchedule,
 )
 from utils.dataset import read_dataset
 
@@ -59,6 +58,8 @@ if __name__ == "__main__":
     criterion = torch.nn.MSELoss()
     scaler = torch.amp.GradScaler(args.device)
 
+    DROPOUT = 0.1
+
     for epoch in range(args.epochs):
         train_loss = 0
         i = 0
@@ -69,6 +70,8 @@ if __name__ == "__main__":
             xt = xt.to(args.device)
 
             if conditional:
+                mask = torch.rand(c.shape)
+                c[mask < DROPOUT] = 0
                 c = c.to(args.device)
             else:
                 c = None

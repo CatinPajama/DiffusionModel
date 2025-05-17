@@ -80,7 +80,7 @@ class GausianDiffusion:
         acap = self.schedule.alpha_hat[t][:, None, None, None]
         return x_t * torch.sqrt(acap) + noise * torch.sqrt(1 - acap), noise, t
 
-    def sample(self, model: nn.Module, batch_size: int, num_classes):
+    def sample(self, model: nn.Module, batch_size: int, num_classes, w=3):
         """
         Samples images of shape
 
@@ -111,12 +111,21 @@ class GausianDiffusion:
             coeff = (1 - self.schedule.alpha[t]) / torch.sqrt(
                 1 - self.schedule.alpha_hat[t]
             )
-            x = (1 / torch.sqrt(self.schedule.alpha[t])) * (
-                x
-                - coeff
-                * model(
-                    x, torch.full((batch_size,), t, device=self.schedule.device), labels
+            predicted_noise_cond = model(
+                x, torch.full((batch_size,), t, device=self.schedule.device), labels
+            )
+
+            predicted_noise = predicted_noise_cond
+
+            if w > 0:
+                predicted_noise_uncond = model(
+                    x,
+                    torch.full((batch_size,), t, device=self.schedule.device),
                 )
+                predicted_noise += (1 - w) * predicted_noise_uncond
+
+            x = (1 / torch.sqrt(self.schedule.alpha[t])) * (
+                x - coeff * predicted_noise
             ) + z * torch.sqrt(self.schedule.beta[t])
 
         return x
