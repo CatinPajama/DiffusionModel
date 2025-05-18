@@ -80,7 +80,7 @@ class GausianDiffusion:
         acap = self.schedule.alpha_hat[t][:, None, None, None]
         return x_t * torch.sqrt(acap) + noise * torch.sqrt(1 - acap), noise, t
 
-    def sample(self, model: nn.Module, batch_size: int, num_classes, w=3):
+    def sample(self, model: nn.Module, batch_size: int, num_classes, w=7):
         """
         Samples images of shape
 
@@ -97,8 +97,6 @@ class GausianDiffusion:
                 1, num_classes + 1, (batch_size,), device=self.schedule.device
             )
 
-        print(labels)
-
         x = torch.normal(0, 1, (batch_size, 1, 48, 48), device=self.schedule.device)
 
         # Reverse diffusion process
@@ -111,18 +109,18 @@ class GausianDiffusion:
             coeff = (1 - self.schedule.alpha[t]) / torch.sqrt(
                 1 - self.schedule.alpha_hat[t]
             )
-            predicted_noise_cond = model(
+
+            predicted_noise = model(
                 x, torch.full((batch_size,), t, device=self.schedule.device), labels
             )
-
-            predicted_noise = predicted_noise_cond
 
             if w > 0:
                 predicted_noise_uncond = model(
                     x,
                     torch.full((batch_size,), t, device=self.schedule.device),
+                    torch.full((batch_size,), 0, device=self.schedule.device),
                 )
-                predicted_noise += (1 - w) * predicted_noise_uncond
+                predicted_noise = torch.lerp(predicted_noise_uncond, predicted_noise, w)
 
             x = (1 / torch.sqrt(self.schedule.alpha[t])) * (
                 x - coeff * predicted_noise

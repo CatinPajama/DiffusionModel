@@ -2,6 +2,10 @@
 
 Pytorch implemention of DiT 
 
+## Conditional generation from FER2013 dataset
+
+![image](assets/output.png)
+
 ## References
 - [Denoising Diffusion Probabilistic Models (Ho et al., 2020)](https://arxiv.org/abs/2006.11239)
 - [DiT: Diffusion Transformers (Peebles & Xie, 2022)](https://arxiv.org/abs/2212.09748)

@@ -60,19 +60,19 @@ if __name__ == "__main__":
 
     DROPOUT = 0.1
 
+    model.train()
+
     for epoch in range(args.epochs):
         train_loss = 0
         i = 0
         for xt, c in dataloader:
 
-            model.train()
-
             xt = xt.to(args.device)
 
             if conditional:
+                c = c.clone().to(args.device)
                 mask = torch.rand(c.shape)
                 c[mask < DROPOUT] = 0
-                c = c.to(args.device)
             else:
                 c = None
 
@@ -85,6 +85,9 @@ if __name__ == "__main__":
 
             optimizer.zero_grad()
             scaler.scale(loss).backward()
+
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
             scaler.step(optimizer)
             scaler.update()
